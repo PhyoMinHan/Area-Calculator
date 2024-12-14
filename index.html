@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice</title>
+</head>
+
+<body>
+    <main>
+        <div>
+            <h2>Result : <span id='msg-1'></span></h2>
+            <div>
+                <label>Width</label>
+                <input type="number" id="width" style="outline: none;">
+                <label>breadth</label>
+                <input type="number" id="breadth" style="outline: none;">
+            </div>
+            <br>
+            <div>
+                <button onclick="calculate()" type="button">Submit</button>
+                <button type="button" id="store">Store</button>
+            </div>
+        </div>
+        <ul id="area-list"></ul>
+    </main>
+    <script>
+        const areaList = document.getElementById('area-list');
+        const msg1 = document.getElementById('msg-1');
+        const storeButton = document.getElementById('store');
+        let answer = '';
+        const storeCalculations = JSON.parse(localStorage.getItem('calculationlist')) || [];
+        storeCalculations.forEach(({ width, breadth, area }) => {
+            const list = document.createElement('li');
+            list.innerHTML = `${width} * ${breadth} = ${area} sqft<sup>2</sup><button class="delete-btn">Delete</button>`;
+            areaList.appendChild(list);
+            list.querySelector(".delete-btn").addEventListener("click", () => {
+                calcDelete(width, breadth, area, list);
+            });
+        });
+        storeButton.addEventListener("click", () => {
+            if (answer) {
+                const { width, breadth, area } = answer;
+                const existingItems = Array.from(areaList.children);
+                const alreadyStored = existingItems.some((item) => item.innerHTML.includes(`${width} * ${breadth} = ${area}`));///// some is same item find method innerHTML
+                console.log(alreadyStored);
+                if (alreadyStored) {
+                    alert('This calculation is already stored.');
+                    return;
+                };
+                const list = document.createElement('li');
+                list.innerHTML = `${width} * ${breadth} = ${area} sqft<sup>2</sup><button class="delete-btn">Delete</button>`;
+                areaList.appendChild(list);
+                list.querySelector(".delete-btn").addEventListener("click", () => {
+                    calcDelete(width, breadth, area, list);
+                });
+                const storeCalculations = JSON.parse(localStorage.getItem('calculationlist')) || [];
+                storeCalculations.push({ width, breadth, area });
+                localStorage.setItem('calculationlist', JSON.stringify(storeCalculations));
+            } else {
+                alert("Please calculate the area first.")
+            }
+        });
+        function calcDelete(width, breadth, area, list) {
+            list.remove();
+            const storeCalculations = JSON.parse(localStorage.getItem('calculationlist')) || [];
+            console.log(storeCalculations);
+            const updatedCalculations = storeCalculations.filter(item => !(item.width === width && item.breadth === breadth && item.area === area));
+            localStorage.setItem('calculationlist', JSON.stringify(updatedCalculations));
+        }
+        function calculate() {
+            const widthInput = document.getElementById('width');
+            const breadthInput = document.getElementById('breadth');
+            const width = parseInt(widthInput.value);
+            const breadth = parseInt(breadthInput.value);
+            if (isNaN(width) || isNaN(breadth) || width <= 0 || breadth <= 0) {
+                return alert('Please fill a numbers for width and breadth');
+            }
+            const area = width * breadth;
+            answer = { width, breadth, area };
+            // console.log(answer);
+            msg1.innerHTML = `${width} * ${breadth} = ${area} sqft<sup>2</sup>`;
+            widthInput.value = '';
+            breadthInput.value = "";
+        };
+        document.addEventListener('keydown', (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                calculate();
+            }
+        })
+    </script>
+</body>
+
+</html>

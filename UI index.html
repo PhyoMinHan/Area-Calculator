@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Area Project</title>
+    <link rel="stylesheet" href="../output.css">
+    <style>
+        #alertModal {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans flex flex-col items-center justify-center min-h-screen">
+    <main class="rounded-lg w-full max-w-2xl flex justify-center items-center p-2">
+        <div class="w-full px-7 py-10 bg-white rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold text-center mb-6 text-gray-800">Calculate Area</h2>
+            <div class="mb-4">
+                <h3 class="text-xl text-gray-700 mb-2">Result: <span id="msg-1" class="font-bold text-blue-500"></span>
+                </h3>
+            </div>
+            <div class="mb-4">
+                <label for="width" class="block text-gray-700">Width</label>
+                <input type="number" id="width"
+                    class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    placeholder="Enter width">
+            </div>
+            <div class="mb-4">
+                <label for="breadth" class="block text-gray-700">Breadth</label>
+                <input type="number" id="breadth"
+                    class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-100"
+                    placeholder="Enter breadth">
+            </div>
+            <div class="gap-x-4 flex">
+                <button onclick="calculateArea()" type="button"
+                    class="bg-blue-500 text-white py-2 outline-none px-4 rounded-lg hover:bg-blue-600 transition">Calculate</button>
+                <button type="button" id="store"
+                    class="bg-green-500 text-white py-2 outline-none px-4 rounded-lg hover:bg-green-600 transition">Store</button>
+            </div>
+            <ul id="area-list" class="mt-6 space-y-2">
+
+            </ul>
+        </div>
+    </main>
+
+    <div id="alertModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 text-center transition-all transform scale-100">
+            <div id="modalMessage" class="text-xl font-bold mb-4"></div>
+            <div class="mt-4">
+                <button id="closeModalBtn"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const areaList = document.getElementById('area-list');
+        const storeButton = document.getElementById('store');
+        const msg1 = document.getElementById('msg-1');
+        let lastCalculation = "";
+
+        const storedCalculations = JSON.parse(localStorage.getItem('calculations')) || [];
+        storedCalculations.forEach(({ width, breadth, area }) => { //(){} is important because of only obj
+            const list = document.createElement('li');
+            list.classList.add('bg-gray-50', 'flex', 'justify-center', 'items-center', 'p-2', 'rounded-lg', 'border', 'border-gray-300');
+            list.innerHTML = `${width} * ${breadth} = ${area} sqFt<sup>2</sup>
+                <button class="delete-btn bg-red-500 text-white rounded-lg px-2 py-1 ml-4 hover:bg-red-600">Delete</button>`;
+            areaList.appendChild(list);
+            list.querySelector('.delete-btn').addEventListener('click', () => {
+                deleteCalculation(width, breadth, area, list);
+            });
+        });
+
+        function calculateArea() {
+            const widthInput = document.getElementById('width');
+            const breadthInput = document.getElementById('breadth');
+            const width = parseInt(widthInput.value);
+            const breadth = parseInt(breadthInput.value);
+            if (isNaN(width) || isNaN(breadth) || width <= 0 || breadth <= 0) {
+                showModal(`<span class='text-red-500'>Please enter valid positive numbers for width and breadth.</span>`);
+                return;
+            };
+            const area = width * breadth;
+            lastCalculation = { width, breadth, area };
+            msg1.innerHTML = `${width} * ${breadth} = ${area} sqFt<sup>2</sup>`;
+            widthInput.value = '';
+            breadthInput.value = '';
+        };
+
+        storeButton.addEventListener('click', () => {
+            if (lastCalculation) {
+                const { width, breadth, area } = lastCalculation;
+                const existingItems = Array.from(areaList.children);
+                console.log(existingItems);
+                const alreadyStored = existingItems.some((item) => item.textContent.includes
+                    (`${width} * ${breadth} = ${area}`));
+                console.log(alreadyStored);
+
+                if (alreadyStored) {
+                    showModal('This calculation is already stored.');
+                    return;
+                };
+                const list = document.createElement('li');
+                list.classList.add('bg-gray-50', 'p-2', 'flex', 'justify-center', 'items-center', 'rounded-lg', 'border', 'border-gray-300');
+                list.innerHTML = `${width} * ${breadth} = ${area} sqFt<sup>2</sup>
+                <button class="delete-btn bg-red-500 text-white rounded-lg px-2 py-1 ml-4 hover:bg-red-600">Delete</button>`;
+                areaList.appendChild(list);
+
+                list.querySelector('.delete-btn').addEventListener('click', () => {
+                    deleteCalculation(width, breadth, area, list);
+                });
+                const storedCalculations = JSON.parse(localStorage.getItem('calculations')) || [];
+                storedCalculations.push({ width, breadth, area });
+                localStorage.setItem('calculations', JSON.stringify(storedCalculations));
+            } else {
+                showModal('Please calculate the area first.');
+            }
+        });
+        function deleteCalculation(width, breadth, area, list) {
+            list.remove();
+            // areaList.removeChild(list); (advanced code);;;;;;
+            const storedCalculations = JSON.parse(localStorage.getItem('calculations')) || [];
+            console.log(storedCalculations);
+            const updatedCalculations = storedCalculations.filter(item => !(item.width === width && item.breadth === breadth && item.area === area));
+            console.log(updatedCalculations);
+            localStorage.setItem('calculations', JSON.stringify(updatedCalculations));
+            showModal(`<span class='text-green-500'>The calculation has been deleted.</span>`);
+            return;
+        };
+
+        let isModalOpen = false;
+        function showModal(message) {
+            if (isModalOpen) return;
+            const modal = document.getElementById('alertModal');
+            const modalMessage = document.getElementById('modalMessage');
+            modalMessage.innerHTML = message;
+            modal.style.display = "flex";
+            isModalOpen = true;
+        };
+
+        document.getElementById('closeModalBtn').addEventListener('click', () => {
+            const modal = document.getElementById('alertModal');
+            modal.style.display = "none";
+            isModalOpen = false;
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === "Escape") {
+                const modal = document.getElementById('alertModal');
+                modal.style.display = "none";
+                isModalOpen = false;
+            };
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                calculateArea();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === "Delete") {
+                event.preventDefault();
+                deleteCalculation();
+            }
+        });
+    </script>
+
+</body>
+
+</html>
