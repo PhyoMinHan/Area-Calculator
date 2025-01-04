@@ -135,17 +135,6 @@
                 showModal(`<span class='text-yellow-500'>Please calculate the area first.</span>`);
             }
         });
-        // function deleteCalculation(width, breadth, area, list) {
-        //     list.remove();
-        //     // areaList.removeChild(list); (advanced code);;;;;;
-        //     const storedCalculations = JSON.parse(localStorage.getItem('calculations')) || [];
-        //     console.log(storedCalculations);
-        //     const updatedCalculations = storedCalculations.filter(item => !(item.width === width && item.breadth === breadth && item.area === area));
-        //     console.log(updatedCalculations);
-        //     localStorage.setItem('calculations', JSON.stringify(updatedCalculations));
-        //     showModal(`<span class='text-green-500'>The calculation has been deleted.</span>`);
-        //     return;
-        // };
         function deleteCalculation(width, breadth, area, list) {
             const deleteModal = document.getElementById('deleteModal');
             const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
