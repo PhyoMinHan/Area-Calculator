@@ -29,6 +29,7 @@
         const areaList = document.getElementById('area-list');
         const msg1 = document.getElementById('msg-1');
         const storeButton = document.getElementById('store');
+        const clearAll = document.getElementById('clear');
         let answer = '';
         const storeCalculations = JSON.parse(localStorage.getItem('calculationlist')) || [];
         storeCalculations.forEach(({ width, breadth, area }) => {
@@ -63,7 +64,7 @@
             }
         });
         function calcDelete(width, breadth, area, list) {
-            list.remove();
+            if (confirm("are you sure to delete") && list.remove());
             const storeCalculations = JSON.parse(localStorage.getItem('calculationlist')) || [];
             console.log(storeCalculations);
             const updatedCalculations = storeCalculations.filter(item => !(item.width === width && item.breadth === breadth && item.area === area));

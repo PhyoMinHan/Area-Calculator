@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Area Project</title>
-    <link rel="stylesheet" href="../output.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         #alertModal {
             display: none;
@@ -44,6 +44,21 @@
             </ul>
         </div>
     </main>
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 class="text-lg font-semibold mb-4 text-gray-800">Are you sure you want to delete?</h2>
+            <div class="flex justify-end space-x-4">
+                <button id="cancelDeleteBtn"
+                    class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
+                    Cancel
+                </button>
+                <button id="confirmDeleteBtn"
+                    class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div id="alertModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 text-center transition-all transform scale-100">
@@ -101,7 +116,7 @@
                 console.log(alreadyStored);
 
                 if (alreadyStored) {
-                    showModal('This calculation is already stored.');
+                    showModal(`<span class='text-yellow-500'>This calculation is already stored.</span>`);
                     return;
                 };
                 const list = document.createElement('li');
@@ -117,20 +132,50 @@
                 storedCalculations.push({ width, breadth, area });
                 localStorage.setItem('calculations', JSON.stringify(storedCalculations));
             } else {
-                showModal('Please calculate the area first.');
+                showModal(`<span class='text-yellow-500'>Please calculate the area first.</span>`);
             }
         });
+        // function deleteCalculation(width, breadth, area, list) {
+        //     list.remove();
+        //     // areaList.removeChild(list); (advanced code);;;;;;
+        //     const storedCalculations = JSON.parse(localStorage.getItem('calculations')) || [];
+        //     console.log(storedCalculations);
+        //     const updatedCalculations = storedCalculations.filter(item => !(item.width === width && item.breadth === breadth && item.area === area));
+        //     console.log(updatedCalculations);
+        //     localStorage.setItem('calculations', JSON.stringify(updatedCalculations));
+        //     showModal(`<span class='text-green-500'>The calculation has been deleted.</span>`);
+        //     return;
+        // };
         function deleteCalculation(width, breadth, area, list) {
-            list.remove();
-            // areaList.removeChild(list); (advanced code);;;;;;
-            const storedCalculations = JSON.parse(localStorage.getItem('calculations')) || [];
-            console.log(storedCalculations);
-            const updatedCalculations = storedCalculations.filter(item => !(item.width === width && item.breadth === breadth && item.area === area));
-            console.log(updatedCalculations);
-            localStorage.setItem('calculations', JSON.stringify(updatedCalculations));
-            showModal(`<span class='text-green-500'>The calculation has been deleted.</span>`);
-            return;
-        };
+            const deleteModal = document.getElementById('deleteModal');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+
+            // Show the modal
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('flex');
+
+            // Confirm deletion
+            confirmDeleteBtn.onclick = () => {
+                list.remove();
+                const storedCalculations = JSON.parse(localStorage.getItem('calculations')) || [];
+                const updatedCalculations = storedCalculations.filter(item => !(item.width === width && item.breadth === breadth && item.area === area));
+                localStorage.setItem('calculations', JSON.stringify(updatedCalculations));
+
+                // Hide the modal after deletion
+                deleteModal.classList.add('hidden');
+                deleteModal.classList.remove('flex');
+
+                showModal(`<span class='text-green-500'>The calculation has been deleted.</span>`);
+            };
+
+            // Cancel deletion
+            cancelDeleteBtn.onclick = () => {
+                // Hide the modal without deleting
+                deleteModal.classList.add('hidden');
+                deleteModal.classList.remove('flex');
+            };
+        }
 
         let isModalOpen = false;
         function showModal(message) {
